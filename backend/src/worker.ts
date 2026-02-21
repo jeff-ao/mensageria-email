@@ -1,11 +1,7 @@
 import dotenv from "dotenv";
 dotenv.config();
-import Queue from "bull";
 import nodemailer from "nodemailer";
-
-const emailQueue = new Queue("envia-email", {
-  redis: { host: "127.0.0.1", port: 6379 },
-});
+import { RabbitMQConnection } from "./config/rabbitmq";
 
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
@@ -17,20 +13,39 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-emailQueue.process(async (job) => {
-  const { imovel, clienteEmail } = job.data;
-  const mailOptions = {
-    from: process.env.EMAIL_USER,
-    to: clienteEmail,
-    subject: `Novo imóvel disponível: ${imovel.tipo}`,
-    text: `Olá, um novo imóvel está disponível: Tipo: ${imovel.tipo}, Metragem: ${imovel.metragem}, Bairro: ${imovel.bairro}.`,
-  };
-  const result = await transporter.sendMail(mailOptions);
-  console.log("Email enviado:", result.messageId);
-});
+const QUEUE_NAME = "envia-email";
 
-emailQueue.on("failed", (job, err) => {
-  console.error("Falha ao processar job:", err.message);
-});
+async function startWorker() {
+  const rabbitmq = new RabbitMQConnection();
+  await rabbitmq.connect();
+  const channel = rabbitmq.getChannel();
 
-export default emailQueue;
+  await channel.assertQueue(QUEUE_NAME, { durable: true });
+  console.log("Worker aguardando mensagens na fila:", QUEUE_NAME);
+
+  channel.consume(
+    QUEUE_NAME,
+    async (msg) => {
+      if (msg) {
+        try {
+          const { email, imovel } = JSON.parse(msg.content.toString());
+          const mailOptions = {
+            from: process.env.EMAIL_USER,
+            to: email,
+            subject: `Novo imóvel disponível: ${imovel.tipo}`,
+            text: `Olá, um novo imóvel está disponível: Tipo: ${imovel.tipo}, Metragem: ${imovel.metragem}, Bairro: ${imovel.bairro}.`,
+          };
+          const result = await transporter.sendMail(mailOptions);
+          console.log("Email enviado:", result.messageId);
+          channel.ack(msg);
+        } catch (error) {
+          console.error("Erro ao processar mensagem:", error);
+          channel.nack(msg, false, false);
+        }
+      }
+    },
+    { noAck: false },
+  );
+}
+
+await startWorker();
