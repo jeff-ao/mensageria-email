@@ -1,3 +1,5 @@
+import dotenv from "dotenv";
+dotenv.config();
 import Queue from "bull";
 import nodemailer from "nodemailer";
 
@@ -23,7 +25,12 @@ emailQueue.process(async (job) => {
     subject: `Novo imóvel disponível: ${imovel.tipo}`,
     text: `Olá, um novo imóvel está disponível: Tipo: ${imovel.tipo}, Metragem: ${imovel.metragem}, Bairro: ${imovel.bairro}.`,
   };
-  await transporter.sendMail(mailOptions);
+  const result = await transporter.sendMail(mailOptions);
+  console.log("Email enviado:", result.messageId);
+});
+
+emailQueue.on("failed", (job, err) => {
+  console.error("Falha ao processar job:", err.message);
 });
 
 export default emailQueue;
