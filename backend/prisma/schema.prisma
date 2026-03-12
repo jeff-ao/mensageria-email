@@ -40,6 +40,8 @@ model Imoveis {
   createdAt DateTime @default(now())
 
   Corretores   Corretores @relation(fields: [corretorId], references: [id])
+  ImgTemp ImgTemp[]
+
 }
 
 model Interesses {
@@ -50,4 +52,15 @@ model Interesses {
 
   createdAt DateTime @default(now())
   Clientes   Clientes @relation(fields: [clienteId], references: [id])
+}
+
+model ImgTemp {
+  id       Int      @id @default(autoincrement())
+  blob    Bytes 
+  imovelId Int
+  terminou Boolean @default(false)
+  createdAt DateTime @default(now())
+
+  Imoveis Imoveis@relation(fields: [imovelId], references: [id])
+
 }
