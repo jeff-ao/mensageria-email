@@ -2,10 +2,25 @@ import { prisma } from "../lib/prisma";
 import { RequestImovel } from "../types/imovel";
 
 import { RabbitMQConnection } from "../config/rabbitmq";
+import { Blob } from "buffer";
+import { Bytes } from "../../generated/prisma/internal/prismaNamespace";
 
 const rabbitmq = new RabbitMQConnection();
 
-const QUEUE_NAME = "envia-email";
+await rabbitmq.connect();
+
+const EMAIL_QUEUE = "envia-email";
+const IMG_QUEUE = "processa-imagem";
+
+const channel = rabbitmq.getChannel();
+
+await channel.assertQueue(EMAIL_QUEUE, {
+  durable: true,
+});
+
+await channel.assertQueue(IMG_QUEUE, {
+  durable: true,
+});
 
 export const imovelService = {
   cadastrarImovel: async (id: number, imovelData: RequestImovel) => {
@@ -37,19 +52,18 @@ export const imovelService = {
 
       if (clientes.length > 0) {
         console.log("preparando mensagens ");
-        await rabbitmq.connect();
-        const channel = rabbitmq.getChannel();
+        // const channel = rabbitmq.getChannel();
 
-        await channel.assertQueue(QUEUE_NAME, {
-          durable: true,
-        });
+        // await channel.assertQueue(EMAIL_QUEUE, {
+        //   durable: true,
+        // });
 
         for (const cliente of clientes) {
           const mensagem = JSON.stringify({
             email: cliente.email,
             imovel: imovel,
           });
-          channel.sendToQueue(QUEUE_NAME, Buffer.from(mensagem));
+          channel.sendToQueue(EMAIL_QUEUE, Buffer.from(mensagem));
 
           console.log("enviado para o cliente: ", cliente.name);
         }
@@ -58,6 +72,30 @@ export const imovelService = {
       return imovel;
     } catch (error) {
       throw new Error(`erro ao cadastrar, ${error}`);
+    }
+  },
+  cadastrarImagemPorId: async (id: number, imagem: Bytes) => {
+    try {
+      const imovel = await prisma.imoveis.findUnique({
+        where: { id },
+      });
+
+      if (!imovel) {
+        throw new Error("Imovel não encontrado");
+      }
+
+      const imgTemp = await prisma.imgTemp.create({
+        data: {
+          blob: imagem,
+          imovelId: id,
+        },
+      });
+
+      channel.sendToQueue(IMG_QUEUE, Buffer.from(JSON.stringify(imgTemp.id)));
+
+      return imgTemp;
+    } catch (error) {
+      throw new Error(`erro ao cadastrar imagem, ${error}`);
     }
   },
 };

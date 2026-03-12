@@ -8,9 +8,13 @@ export const corretorController = {
       const imovelData: RequestImovel = req.body;
       const id = Number(req.params.id);
 
-      await imovelService.cadastrarImovel(id, imovelData);
+      const imovel = await imovelService.cadastrarImovel(id, imovelData);
 
-      res.json({ status: "ok", message: "imovel cadastrado" });
+      res.json({
+        status: "ok",
+        message: "imovel cadastrado",
+        imovel_id: imovel.id,
+      });
       return;
     } catch (error) {
       console.error("Erro ao cadastrar imóvel:", error);
