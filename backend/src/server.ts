@@ -1,5 +1,6 @@
 import express from "express";
 import corretorRouter from "./routes/corretores.routes";
+import imovelRouter from "./routes/imovel.routes";
 
 const app = express();
 const PORT = 3000;
@@ -11,6 +12,7 @@ app.get("/health", (req, res) => {
 });
 
 app.use("/corretor", corretorRouter);
+app.use("/imovel", imovelRouter);
 
 app
   .listen(PORT, () => {
