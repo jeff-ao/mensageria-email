@@ -10,6 +10,14 @@ const QUEUE_NAME = "envia-email";
 export const imovelService = {
   cadastrarImovel: async (id: number, imovelData: RequestImovel) => {
     try {
+      const corretor = await prisma.corretores.findUnique({
+        where: { id },
+      });
+
+      if (!corretor) {
+        throw new Error("Corretor não encontrado");
+      }
+
       const imovel = await prisma.imoveis.create({
         data: {
           bairro: imovelData.bairro,

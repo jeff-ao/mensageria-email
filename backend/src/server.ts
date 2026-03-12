@@ -1,10 +1,16 @@
-import Express from "express";
+import express from "express";
 import corretorRouter from "./routes/corretores.routes";
-const app = Express();
-const PORT = process.env.PORT || 3000;
 
-app.use(Express.json());
-app.use(corretorRouter);
+const app = express();
+const PORT = 3000;
+
+app.use(express.json());
+
+app.get("/health", (req, res) => {
+  res.json({ status: "ok", message: "Server is running" });
+});
+
+app.use("/corretor", corretorRouter);
 
 app
   .listen(PORT, () => {
