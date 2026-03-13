@@ -98,4 +98,22 @@ export const imovelService = {
       throw new Error(`erro ao cadastrar imagem, ${error}`);
     }
   },
+  ContarStatusImagemPorImovelId: async (id: number) => {
+    try {
+      const imovel = await prisma.imoveis.findUnique({
+        where: { id },
+      });
+
+      if (!imovel) {
+        throw new Error("Imovel não encontrado");
+      }
+
+      const imagens = await prisma.imgTemp.count({
+        where: { imovelId: id },
+      });
+      return imagens;
+    } catch (error) {
+      throw new Error(`erro ao listar status da imagem, ${error}`);
+    }
+  },
 };
