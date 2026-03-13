@@ -24,4 +24,23 @@ export const imovelController = {
       res.status(500).json({ status: "error", message: error });
     }
   },
+  ContarStatusImagemPorImovelId: async (req: Request, res: Response) => {
+    try {
+      const id = Number(req.params.id);
+
+      if (!id) {
+        throw new Error("ID do imóvel não fornecido");
+      }
+
+      const imagens = await imovelService.ContarStatusImagemPorImovelId(id);
+      res.status(200).json({
+        status: "ok",
+        message: "contagem de imagens sendo processadas",
+        contagem: imagens,
+      });
+    } catch (error) {
+      console.error("Erro ao contar status das imagens:", error);
+      res.status(500).json({ status: "error", message: error });
+    }
+  },
 };
