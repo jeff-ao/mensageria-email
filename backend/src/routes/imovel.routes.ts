@@ -3,7 +3,7 @@ import { imovelController } from "../controllers/imovel.controller";
 import upload from "../middlewares/upload";
 const router = Router();
 
-router.post("/:id/imagens", upload.single("image"), (req, res) => {
+router.post("/:id/imagem", upload.single("image"), (req, res) => {
   imovelController.cadastrarImagem(req, res);
 });
 
