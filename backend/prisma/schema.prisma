@@ -32,35 +32,45 @@ model Corretores {
 }
 
 model Imoveis {
-  id        Int      @id @default(autoincrement())
-  tipo   String
+  id         Int      @id @default(autoincrement())
+  tipo       String
   corretorId Int
-  metragem     Float
-  bairro      String
-  createdAt DateTime @default(now())
+  metragem   Float
+  bairro     String
+  createdAt  DateTime @default(now())
 
-  Corretores   Corretores @relation(fields: [corretorId], references: [id])
-  ImgTemp ImgTemp[]
+  Corretores Corretores @relation(fields: [corretorId], references: [id])
+  ImgTemp    ImgTemp[]
 
+  imgImovels Img_imovel[]
 }
 
 model Interesses {
-  id        Int      @id @default(autoincrement())
+  id        Int    @id @default(autoincrement())
   clienteId Int
-  metragem     Float
-  bairro      String
+  metragem  Float
+  bairro    String
 
   createdAt DateTime @default(now())
-  Clientes   Clientes @relation(fields: [clienteId], references: [id])
+  Clientes  Clientes @relation(fields: [clienteId], references: [id])
 }
 
 model ImgTemp {
-  id       Int      @id @default(autoincrement())
-  blob    Bytes 
-  imovelId Int
-  terminou Boolean @default(false)
+  id        Int      @id @default(autoincrement())
+  blob      Bytes
+  imovelId  Int
+  terminou  Boolean  @default(false)
   createdAt DateTime @default(now())
 
-  Imoveis Imoveis@relation(fields: [imovelId], references: [id])
+  Imoveis Imoveis @relation(fields: [imovelId], references: [id])
+}
 
+model Img_imovel {
+  id       Int    @id @default(autoincrement())
+  imovelId Int
+  arquivo  Bytes
+  formato  String
+
+  createdAt DateTime @default(now())
+  Imoveis   Imoveis  @relation(fields: [imovelId], references: [id])
 }
