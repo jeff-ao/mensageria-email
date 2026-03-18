@@ -33,6 +33,10 @@ export const imovelService = {
         throw new Error("Corretor não encontrado");
       }
 
+      if (typeof imovelData.metragem === "string") {
+        imovelData.metragem = parseFloat(imovelData.metragem);
+      }
+
       const imovel = await prisma.imoveis.create({
         data: {
           bairro: imovelData.bairro,
