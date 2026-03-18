@@ -1,0 +1,234 @@
+{
+  "info": {
+    "name": "Mensageria Email - API Completa",
+    "description": "Collection completa com todas as rotas atuais do backend, incluindo fluxo de cadastro de imovel e upload de imagem.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_postman_id": "49ef2fce-96c9-4b44-8ea2-d85f21f80d29"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "corretorId",
+      "value": "1"
+    },
+    {
+      "key": "imovelId",
+      "value": ""
+    },
+    {
+      "key": "imagePath",
+      "value": "/home/SEU_USUARIO/Imagens/exemplo.jpg"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "GET /health",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Retorna status ok', function () {",
+                  "  var data = pm.response.json();",
+                  "  pm.expect(data.status).to.eql('ok');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Corretores",
+      "item": [
+        {
+          "name": "GET /corretor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/corretor",
+              "host": ["{{baseUrl}}"],
+              "path": ["corretor"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST /corretor/:id/imovel (cria imovel)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "var data = pm.response.json();",
+                  "",
+                  "pm.test('Retorna imovel_id', function () {",
+                  "  pm.expect(data).to.have.property('imovel_id');",
+                  "});",
+                  "",
+                  "if (data.imovel_id) {",
+                  "  pm.collectionVariables.set('imovelId', String(data.imovel_id));",
+                  "}",
+                  "",
+                  "pm.test('imovelId salvo na collection', function () {",
+                  "  pm.expect(pm.collectionVariables.get('imovelId')).to.not.be.empty;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tipo\": \"Apartamento\",\n  \"metragem\": 80,\n  \"bairro\": \"Centro\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/corretor/{{corretorId}}/imovel",
+              "host": ["{{baseUrl}}"],
+              "path": ["corretor", "{{corretorId}}", "imovel"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Imoveis / Imagens",
+      "item": [
+        {
+          "name": "POST /imovel/:id/imagens (upload)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "var data = pm.response.json();",
+                  "",
+                  "pm.test('Retorna img_id', function () {",
+                  "  pm.expect(data).to.have.property('img_id');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": "{{imagePath}}"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/imovel/{{imovelId}}/imagens",
+              "host": ["{{baseUrl}}"],
+              "path": ["imovel", "{{imovelId}}", "imagens"]
+            },
+            "description": "Use este request depois de criar um imovel. O campo form-data deve ser image."
+          },
+          "response": []
+        },
+        {
+          "name": "GET /imovel/:id/imagens-temporarias/quantidade",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "var data = pm.response.json();",
+                  "",
+                  "pm.test('Retorna campo contagem', function () {",
+                  "  pm.expect(data).to.have.property('contagem');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/imovel/{{imovelId}}/imagens-temporarias/quantidade",
+              "host": ["{{baseUrl}}"],
+              "path": [
+                "imovel",
+                "{{imovelId}}",
+                "imagens-temporarias",
+                "quantidade"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
